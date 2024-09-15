@@ -4,36 +4,57 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence } from "framer-motion"
-import { Music, Search, Info, Play, Youtube } from "lucide-react"
+import { Music, Search, Info, Play, Youtube, AlertCircle } from "lucide-react"
+
+interface ApiResponse {
+  artists: string[];
+  playlist_url: string;
+}
 
 export function MusicRecommender() {
   const [query, setQuery] = useState("")
   const [showInput, setShowInput] = useState(true)
   const [animationPhase, setAnimationPhase] = useState<
-    "idle" | "animating" | "loading" | "recommendations"
+    "idle" | "animating" | "loading" | "recommendations" | "error"
   >("idle")
   const [words, setWords] = useState<string[]>([])
   const [showHowItWorks, setShowHowItWorks] = useState(false)
+  const [recommendations, setRecommendations] = useState<ApiResponse | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const mockSongs = [
-    { title: "On The Road Again", artist: "Willie Nelson" },
-    { title: "Life is a Highway", artist: "Rascal Flatts" },
-    { title: "Born to Run", artist: "Bruce Springsteen" },
-    { title: "Route 66", artist: "Chuck Berry" },
-    { title: "Take It Easy", artist: "Eagles" },
-    { title: "Ramblin' Man", artist: "The Allman Brothers Band" },
-    { title: "I've Been Everywhere", artist: "Johnny Cash" },
-    { title: "Highway to Hell", artist: "AC/DC" },
-    { title: "Free Fallin'", artist: "Tom Petty" },
-    { title: "Drive My Car", artist: "The Beatles" },
+  const exampleSearches = [
+    "90s house music for a party\nDisclosure style",
+    "Sing along 2000s pop songs\nfor a road trip",
+    "Relaxing ambient music\nfor a yoga class"
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (query.trim() === "") return
+  const handleSubmit = async (searchQuery: string) => {
+    if (searchQuery.trim() === "") return
     setShowInput(false)
-    setWords(query.split(" "))
+    setWords(searchQuery.split(" "))
     setAnimationPhase("animating")
+
+    try {
+      const response = await fetch('https://music-recommender-tcip.fly.dev/get-playlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_prompt: searchQuery }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recommendations')
+      }
+
+      const data: ApiResponse = await response.json()
+      setRecommendations(data)
+      setAnimationPhase("recommendations")
+    } catch (err) {
+      console.error(err)
+      setError('An error occurred while fetching recommendations. Please try again.')
+      setAnimationPhase("error")
+    }
   }
 
   useEffect(() => {
@@ -41,11 +62,6 @@ export function MusicRecommender() {
       const timer = setTimeout(() => {
         setAnimationPhase("loading")
       }, 2000)
-      return () => clearTimeout(timer)
-    } else if (animationPhase === "loading") {
-      const timer = setTimeout(() => {
-        setAnimationPhase("recommendations")
-      }, 3000)
       return () => clearTimeout(timer)
     }
   }, [animationPhase])
@@ -55,6 +71,8 @@ export function MusicRecommender() {
     setShowInput(true)
     setAnimationPhase("idle")
     setWords([])
+    setRecommendations(null)
+    setError(null)
   }
 
   const containerVariants = {
@@ -84,9 +102,9 @@ export function MusicRecommender() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1, ease: [0.43, 0.13, 0.23, 0.96] }}
-            className="w-full flex flex-col items-center justify-center h-screen"
+            className="w-full flex flex-col items-center justify-center min-h-screen"
           >
-            <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+            <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md mb-8">
               <div className="flex items-center justify-center mb-6">
                 <Music className="w-10 h-10 text-gray-800 mr-2" />
                 <h1 className="text-3xl font-bold text-gray-800">Mood Tunes</h1>
@@ -94,7 +112,7 @@ export function MusicRecommender() {
               <p className="text-gray-600 text-center mb-6">
                 Discover the perfect playlist based on your current mood.
               </p>
-              <form onSubmit={handleSubmit} className="w-full">
+              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(query); }} className="w-full mb-4">
                 <div className="flex space-x-2">
                   <Input
                     type="text"
@@ -112,34 +130,50 @@ export function MusicRecommender() {
                   </Button>
                 </div>
               </form>
+              <div className="relative w-full">
+                <button
+                  onMouseEnter={() => setShowHowItWorks(true)}
+                  onMouseLeave={() => setShowHowItWorks(false)}
+                  className="text-gray-600 hover:text-gray-800 flex items-center"
+                >
+                  <Info className="w-4 h-4 mr-1" />
+                  How it works
+                </button>
+                <AnimatePresence>
+                  {showHowItWorks && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute left-0 top-full mt-2 p-4 bg-white rounded-lg shadow-lg w-full z-10"
+                    >
+                      <p className="text-sm text-gray-600">
+                        1. Enter your mood or desired vibe
+                        <br />
+                        2. Our AI analyzes your input
+                        <br />
+                        3. Get a curated playlist that matches your mood
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
-            <div className="mt-4 relative w-full max-w-md">
-              <button
-                onMouseEnter={() => setShowHowItWorks(true)}
-                onMouseLeave={() => setShowHowItWorks(false)}
-                className="text-gray-600 hover:text-gray-800 flex items-center"
-              >
-                <Info className="w-4 h-4 mr-1" />
-                How it works
-              </button>
-              <AnimatePresence>
-                {showHowItWorks && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute left-0 top-full mt-2 p-4 bg-white rounded-lg shadow-lg w-full"
-                  >
-                    <p className="text-sm text-gray-600">
-                      1. Enter your mood or desired vibe
-                      <br />
-                      2. Our AI analyzes your input
-                      <br />
-                      3. Get a curated playlist that matches your mood
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            <div className="w-full max-w-4xl">
+              <p className="text-sm text-gray-500 mb-4 text-center">Example searches:</p>
+              <div className="w-[70%] mx-auto md:w-full">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {exampleSearches.map((example, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => handleSubmit(example)}
+                      className="w-full h-24 text-left text-sm py-2 px-4 bg-white text-gray-700 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-200 ease-in-out transform hover:scale-98 focus:outline-none focus:ring-2 focus:ring-gray-300 whitespace-pre-line"
+                    >
+                      {example}
+                    </Button>
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -165,46 +199,44 @@ export function MusicRecommender() {
                   {word}
                 </motion.span>
               ))}
-              {animationPhase === "loading" && (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="inline-block"
+              >
                 <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="inline-block"
+                  animate={{
+                    opacity: [0, 1, 0],
+                    transition: { duration: 1.5, repeat: Infinity, ease: "linear" },
+                  }}
                 >
-                  <motion.span
-                    animate={{
-                      opacity: [0, 1, 0],
-                      transition: { duration: 1.5, repeat: Infinity, ease: "linear" },
-                    }}
-                  >
-                    .
-                  </motion.span>
-                  <motion.span
-                    animate={{
-                      opacity: [0, 1, 0],
-                      transition: { duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.5 },
-                    }}
-                  >
-                    .
-                  </motion.span>
-                  <motion.span
-                    animate={{
-                      opacity: [0, 1, 0],
-                      transition: { duration: 1.5, repeat: Infinity, ease: "linear", delay: 1 },
-                    }}
-                  >
-                    .
-                  </motion.span>
+                  .
                 </motion.span>
-              )}
+                <motion.span
+                  animate={{
+                    opacity: [0, 1, 0],
+                    transition: { duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.5 },
+                  }}
+                >
+                  .
+                </motion.span>
+                <motion.span
+                  animate={{
+                    opacity: [0, 1, 0],
+                    transition: { duration: 1.5, repeat: Infinity, ease: "linear", delay: 1 },
+                  }}
+                >
+                  .
+                </motion.span>
+              </motion.span>
             </h2>
           </motion.div>
         )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {animationPhase === "recommendations" && (
+        {animationPhase === "recommendations" && recommendations && (
           <motion.div
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
@@ -216,8 +248,8 @@ export function MusicRecommender() {
               Your Mood Playlist
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              {mockSongs.map((song, index) => (
-                <motion.div
+              {recommendations.artists.map((artist, index) => (
+                <motion.button
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -226,30 +258,56 @@ export function MusicRecommender() {
                     duration: 0.5,
                     ease: [0.43, 0.13, 0.23, 0.96],
                   }}
-                  className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                  className="flex items-center p-3 bg-gray-50 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-98 hover:bg-gray-100 focus:outline-none"
+                  onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' music')}`, '_blank')}
                 >
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4 transition-colors duration-300">
                     <Play className="w-5 h-5 text-gray-600" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-800">{song.title}</h4>
-                    <p className="text-sm text-gray-600">{song.artist}</p>
+                    <h4 className="text-lg font-semibold text-gray-900">{artist}</h4>
+                    <p className="text-sm text-gray-700">Recommended Artist</p>
                   </div>
-                </motion.div>
+                </motion.button>
               ))}
             </div>
             <Button
-              className="w-full text-lg py-4 bg-white text-gray-800 font-semibold rounded-md border-2 border-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 flex items-center justify-center mb-4"
+              className="w-full text-lg py-4 bg-white text-gray-800 font-semibold rounded-md border-2 border-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 flex items-center justify-center mb-4 transition-all duration-300 ease-in-out transform hover:scale-98"
+              onClick={() => window.open(recommendations.playlist_url, '_blank')}
             >
               <Youtube className="w-6 h-6 mr-2 text-red-600" />
-              Listen on YouTube
+              Listen to full playlist
             </Button>
+            <Button
+              onClick={resetSearch}
+              className="w-full text-lg py-4 bg-gray-800 text-white font-semibold rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-98"
+            >
+              <Search className="w-5 h-5 mr-2" />
+              Discover New Mood
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {animationPhase === "error" && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.5, ease: [0.34, 1.56, 0.64, 1] }}
+            className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 mt-16"
+          >
+            <div className="flex items-center justify-center mb-6 text-red-500">
+              <AlertCircle className="w-12 h-12 mr-2" />
+              <h3 className="text-3xl font-semibold">Error</h3>
+            </div>
+            <p className="text-center text-gray-700 mb-8">{error}</p>
             <Button
               onClick={resetSearch}
               className="w-full text-lg py-4 bg-gray-800 text-white font-semibold rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 flex items-center justify-center"
             >
               <Search className="w-5 h-5 mr-2" />
-              Discover New Mood
+              Try Again
             </Button>
           </motion.div>
         )}
