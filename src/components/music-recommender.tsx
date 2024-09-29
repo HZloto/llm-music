@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Music, Search, Info, Play, Youtube, AlertCircle } from "lucide-react"
 
 interface ApiResponse {
-  artists: string[];
+  recommendations: string[];  // List of songs in "Artist - Song Title" format
   playlist_url: string;
 }
 
@@ -21,6 +21,7 @@ export function MusicRecommender() {
   const [showHowItWorks, setShowHowItWorks] = useState(false)
   const [recommendations, setRecommendations] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [hoveredSongIndex, setHoveredSongIndex] = useState<number | null>(null)
 
   const exampleSearches = [
     "90s house music for a party\nDisclosure style",
@@ -112,7 +113,13 @@ export function MusicRecommender() {
               <p className="text-gray-600 text-center mb-6">
                 Discover the perfect playlist based on your current mood.
               </p>
-              <form onSubmit={(e) => { e.preventDefault(); handleSubmit(query); }} className="w-full mb-4">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSubmit(query)
+                }}
+                className="w-full mb-4"
+              >
                 <div className="flex space-x-2">
                   <Input
                     type="text"
@@ -248,28 +255,41 @@ export function MusicRecommender() {
               Your Mood Playlist
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              {recommendations.artists.map((artist, index) => (
-                <motion.button
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: index * 0.1,
-                    duration: 0.5,
-                    ease: [0.43, 0.13, 0.23, 0.96],
-                  }}
-                  className="flex items-center p-3 bg-gray-50 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-98 hover:bg-gray-100 focus:outline-none"
-                  onClick={() => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(artist + ' music')}`, '_blank')}
-                >
-                  <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4 transition-colors duration-300">
-                    <Play className="w-5 h-5 text-gray-600" />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900">{artist}</h4>
-                    <p className="text-sm text-gray-700">Recommended Artist</p>
-                  </div>
-                </motion.button>
-              ))}
+              {recommendations.recommendations.map((song, index) => {
+                const [artist, title] = song.split(" - ")
+                const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
+                  artist
+                )}+-+${encodeURIComponent(title)}`
+                const isHovered = hoveredSongIndex === index
+                const isDimmed = hoveredSongIndex !== null && hoveredSongIndex !== index
+
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: index * 0.1,
+                      duration: 0.5,
+                      ease: [0.43, 0.13, 0.23, 0.96],
+                    }}
+                    className={`song-item flex items-center p-3 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-98 focus:outline-none ${
+                      isHovered ? 'bg-gray-100 cursor-custom' : 'bg-gray-50 hover:bg-gray-100'
+                    } ${isDimmed ? 'opacity-50' : ''}`}
+                    onMouseEnter={() => setHoveredSongIndex(index)}
+                    onMouseLeave={() => setHoveredSongIndex(null)}
+                    onClick={() => window.open(youtubeSearchUrl, '_blank')}
+                  >
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-4 transition-colors duration-300">
+                      <Play className="w-5 h-5 text-gray-600" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900">{title}</h4>
+                      <p className="text-sm text-gray-700">{artist}</p>
+                    </div>
+                  </motion.div>
+                )
+              })}
             </div>
             <Button
               className="w-full text-lg py-4 bg-white text-gray-800 font-semibold rounded-md border-2 border-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300 flex items-center justify-center mb-4 transition-all duration-300 ease-in-out transform hover:scale-98"
@@ -312,6 +332,12 @@ export function MusicRecommender() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <style jsx>{`
+        .cursor-custom {
+          cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="black" height="24" viewBox="0 0 24 24" width="24"><circle cx="12" cy="12" r="12"/></svg>') 12 12, auto;
+        }
+      `}</style>
     </div>
   )
 }
