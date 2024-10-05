@@ -1,10 +1,10 @@
-"use client"
+// "use client"
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { motion, AnimatePresence } from "framer-motion"
-import { Music, Search, Info, Play, Youtube, AlertCircle } from "lucide-react"
+import { Music, Search, Play, Youtube, AlertCircle } from "lucide-react"
 import Link from "next/link"
 
 interface ApiResponse {
@@ -19,7 +19,6 @@ export default function Component() {
     "idle" | "animating" | "loading" | "recommendations" | "error"
   >("idle")
   const [words, setWords] = useState<string[]>([])
-  const [showHowItWorks, setShowHowItWorks] = useState(false)
   const [recommendations, setRecommendations] = useState<ApiResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [hoveredSongIndex, setHoveredSongIndex] = useState<number | null>(null)
@@ -120,11 +119,11 @@ export default function Component() {
               className="w-full max-w-2xl"
             >
               <h2 className="text-4xl md:text-5xl text-gray-800 mb-4 text-center font-sans">
-                <span className="hidden md:inline">Remember when we asked friends for mixtapes?</span>
+                <span className="hidden md:inline">Remember when we asked friends for mixtapes&#39;?</span>
                 <span className="md:hidden">No friends to show you music?</span>
               </h2>
               <p className="text-xl text-gray-600 mb-8 text-center font-serif">
-                <span className="hidden md:inline">We don't have any, so we made an AI do it.</span>
+                <span className="hidden md:inline">We don&#39;t have any, so we made an AI do it.</span>
                 <span className="md:hidden">Let our AI do it.</span>
               </p>
               <form
@@ -177,7 +176,7 @@ export default function Component() {
               className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-90 p-4"
             >
               <motion.h2 
-                className="text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center font-sans font-bold mb-8"
+                className="text-4xl sm:text-5xl md:text-6xl font-bold text-white text-center font-sans mb-8"
                 variants={wordVariants}
               >
                 Creating your mood playlist
