@@ -1,12 +1,11 @@
-import type { Config } from 'tailwindcss'
-
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+const config = {
   darkMode: ['class'],
   content: [
     './src/app/**/*.{js,ts,jsx,tsx}',
     './src/pages/**/*.{js,ts,jsx,tsx}',
     './src/components/**/*.{js,ts,jsx,tsx}',
-	'./src/_app.tsx',
+    './src/_app.tsx',
   ],
   theme: {
     extend: {
@@ -61,11 +60,11 @@ const config: Config = {
       fontFamily: {
         sans: ['Archivo Black', 'sans-serif'],
         serif: ['Playfair Display', 'serif'],
-		test: ['Bowlby One', 'sans-serif'],
+        test: ['Bowlby One', 'sans-serif'],
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  plugins: [require('tailwindcss-animate')],
+};
 
-export default config
+module.exports = config;

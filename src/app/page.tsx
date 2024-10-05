@@ -118,10 +118,10 @@ export default function Component() {
               transition={{ duration: 0.5 }}
               className="w-full max-w-2xl"
             >
-              <h2 className="text-4xl md:text-5xl text-gray-800 mb-4 text-center font-sans">
-                <span className="hidden md:inline">Remember when we asked friends for mixtapes&#39;?</span>
+                <h2 className="text-4xl md:text-5xl text-gray-800 mb-4 text-center" style={{ fontFamily: 'Bowlby One' }}>
+                <span className="hidden md:inline">Remember when we asked friends for mixtapes?</span>
                 <span className="md:hidden">No friends to show you music?</span>
-              </h2>
+                </h2>
               <p className="text-xl text-gray-600 mb-8 text-center font-serif">
                 <span className="hidden md:inline">We don&#39;t have any, so we made an AI do it.</span>
                 <span className="md:hidden">Let our AI do it.</span>
