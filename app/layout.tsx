@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next"
-//import localFont from "next/font/local";
+import localFont from "next/font/local";
+import { Bowlby_One } from "next/font/google";
 import "./globals.css";
 
-/*
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -15,7 +14,12 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 });
-*/
+
+const bowlbyOne = Bowlby_One({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: "Moods",
@@ -28,16 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <title>moods ai playlist</title>
-      </head>
-      <body
-        //className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" className={`${bowlbyOne} ${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body>
         {children}
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

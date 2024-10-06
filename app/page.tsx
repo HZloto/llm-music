@@ -116,11 +116,11 @@ export default function Component() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-full max-w-2xl"
+              className="w-full max-w-3xl"
             >
-                <h2 className="text-4xl md:text-5xl text-gray-800 mb-4 text-center" style={{ fontFamily: 'Bowlby One' }}>
+                <h2 className="text-4xl md:text-5xl text-gray-800 mb-4 text-center archivo-zloto w-full max-w-50rem mx-auto break-words">
                 <span className="hidden md:inline">Remember when we asked friends for mixtapes?</span>
-                <span className="md:hidden">No friends to show you music?</span>
+                <span className="md:hidden">No one to show you good music?</span>
                 </h2>
               <p className="text-xl text-gray-600 mb-8 text-center font-serif">
                 <span className="hidden md:inline">We don&#39;t have any, so we made an AI do it.</span>
@@ -155,8 +155,8 @@ export default function Component() {
                   <Button
                     key={index}
                     onClick={() => handleSubmit(example)}
-                    className="w-full md:w-auto h-auto text-left text-sm py-2 px-4 bg-white bg-opacity-50 text-gray-500 rounded-lg hover:bg-opacity-75 transition-all duration-200 ease-in-out transform hover:scale-98 focus:outline-none focus:ring-2 focus:ring-gray-300 whitespace-pre-line"
-                  >
+                    className="w-xl md:w-auto h-auto text-left text-sm py-2 px-4 bg-white bg-opacity-50 text-gray-500 rounded-lg hover:bg-opacity-75 hover:text-white transition-all duration-200 ease-in-out transform hover:scale-98 focus:outline-none focus:ring-2 focus:ring-gray-300 whitespace-pre-line"
+                    >
                     {example}
                   </Button>
                 ))}
@@ -240,7 +240,7 @@ export default function Component() {
               transition={{ duration: 0.5 }}
               className="w-full max-w-2xl bg-white rounded-lg shadow-lg p-8"
             >
-              <h3 className="text-3xl font-semibold mb-6 text-gray-800 flex items-center font-sans font-bold">
+              <h3 className="text-3xl font-bold mb-6 text-gray-800 flex items-center font-sans font-bold">
                 <Music className="w-8 h-8 mr-2" />
                 Your Mood Playlist
               </h3>
