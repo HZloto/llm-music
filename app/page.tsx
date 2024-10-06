@@ -99,7 +99,7 @@ export default function Component() {
       <header className="w-full bg-white shadow-sm p-4 flex justify-between items-center">
         <h1 className="text-2xl font-serif text-gray-800">moods</h1> {/* Playfair Display */}
         <Link
-          href="https://www.google.com"
+          href="https://www.paypal.com/donate/?hosted_button_id=LL5B6UMWPRRKS"
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-gray-600 hover:text-gray-800 transition-colors font-serif"
